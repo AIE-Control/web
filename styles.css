@@ -1,0 +1,17 @@
+/* Add to existing CSS for more Apple-like effects */
+.hero {
+    position: relative;
+    overflow: hidden;
+}
+
+.hero::after {
+    content: '';
+    position: absolute;
+    bottom: -100px;
+    left: -50%;
+    width: 200%;
+    height: 200px;
+    background: #ffffff;
+    transform: rotate(-3deg);
+    z-index: 1;
+}
