@@ -1,1 +1,96 @@
-Hello from ESP32!
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TechVision | Sensor Data</title>
+    <style>
+        /* Previous Apple-style CSS remains the same */
+        
+        /* Add data display section */
+        .data-container {
+            max-width: 1200px;
+            margin: 4rem auto;
+            padding: 2rem;
+            background: #f5f5f7;
+            border-radius: 18px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .data-title {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            color: #1d1d1f;
+        }
+
+        #data-display {
+            font-family: monospace;
+            font-size: 1.2rem;
+            color: #1d1d1f;
+            white-space: pre-wrap;
+            padding: 1.5rem;
+            background: #ffffff;
+            border-radius: 12px;
+            border: 1px solid #d2d2d7;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-wrapper">
+            <nav>
+                <a href="#" class="logo">Sensor Data</a>
+                <div class="nav-links">
+                    <a href="#live-data">Live Data</a>
+                    <a href="#about">About</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="hero">
+            <div class="hero-content">
+                <h1>Real-Time Sensor Monitoring</h1>
+                <p>Connected via ESP32 with live updates</p>
+            </div>
+        </section>
+
+        <section class="data-container" id="live-data">
+            <h2 class="data-title">Live Sensor Readings</h2>
+            <div id="data-display">Loading data...</div>
+        </section>
+    </main>
+
+    <script>
+        // Real-time data updater
+        async function updateData() {
+            try {
+                // Add timestamp to prevent caching
+                const response = await fetch('data.txt?t=' + new Date().getTime());
+                const data = await response.text();
+                
+                // Format data display
+                const formattedData = data.split('\n')
+                    .filter(line => line.trim())
+                    .map(line => {
+                        const [timestamp, value] = line.split(',');
+                        return `${timestamp} → ${value}`;
+                    })
+                    .join('\n');
+                
+                document.getElementById('data-display').textContent = formattedData;
+            } catch (error) {
+                console.error('Error fetching data:', error);
+                document.getElementById('data-display').textContent = "Error loading data";
+            }
+        }
+
+        // Update every 2 seconds
+        setInterval(updateData, 2000);
+        // Initial load
+        updateData();
+    </script>
+</body>
+</html>
