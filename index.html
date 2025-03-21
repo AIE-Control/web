@@ -89,7 +89,7 @@
                     const latest = readings[readings.length-1].split(',');
                     if(latest.length === 3) {
                         document.getElementById('temperature').textContent = latest[1];
-                        document.getElementById('humidity').textContent = latest[2] + 'V';
+                        document.getElementById('humidity').textContent = latest[2] + ' V';
                         document.getElementById('temp-ts').textContent = `Last update: ${latest[0]}`;
                         document.getElementById('humid-ts').textContent = `Last update: ${latest[0]}`;
                     }
