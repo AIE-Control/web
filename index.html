@@ -3,94 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TechVision | Sensor Data</title>
+    <title>ESP32 Sensor Dashboard</title>
     <style>
-        /* Previous Apple-style CSS remains the same */
-        
-        /* Add data display section */
-        .data-container {
-            max-width: 1200px;
-            margin: 4rem auto;
+        :root {
+            --primary-color: #0071e3;
+            --background-color: #f5f5f7;
+            --card-color: #ffffff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            margin: 0;
             padding: 2rem;
-            background: #f5f5f7;
+            background-color: var(--background-color);
+            color: #1d1d1f;
+        }
+
+        .dashboard {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .data-card {
+            background: var(--card-color);
             border-radius: 18px;
+            padding: 2rem;
+            margin-bottom: 2rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .data-title {
-            font-size: 1.8rem;
-            font-weight: 600;
-            margin-bottom: 1.5rem;
-            color: #1d1d1f;
+        .sensor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
         }
 
-        #data-display {
-            font-family: monospace;
-            font-size: 1.2rem;
-            color: #1d1d1f;
-            white-space: pre-wrap;
-            padding: 1.5rem;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #d2d2d7;
+        .sensor-value {
+            font-size: 2.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin: 1rem 0;
+        }
+
+        .timestamp {
+            color: #86868b;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
-    <header>
-        <div class="nav-wrapper">
-            <nav>
-                <a href="#" class="logo">Sensor Data</a>
-                <div class="nav-links">
-                    <a href="#live-data">Live Data</a>
-                    <a href="#about">About</a>
-                </div>
-            </nav>
+    <div class="dashboard">
+        <div class="header">
+            <h1>ESP32 Live Sensor Data</h1>
+            <p>Real-time updates from connected devices</p>
         </div>
-    </header>
 
-    <main>
-        <section class="hero">
-            <div class="hero-content">
-                <h1>Real-Time Sensor Monitoring</h1>
-                <p>Connected via ESP32 with live updates</p>
+        <div class="sensor-grid">
+            <div class="data-card">
+                <h2>Temperature</h2>
+                <div class="sensor-value" id="temperature">--</div>
+                <div class="timestamp" id="temp-ts">Last update: --</div>
             </div>
-        </section>
 
-        <section class="data-container" id="live-data">
-            <h2 class="data-title">Live Sensor Readings</h2>
-            <div id="data-display">Loading data...</div>
-        </section>
-    </main>
+            <div class="data-card">
+                <h2>Humidity</h2>
+                <div class="sensor-value" id="humidity">--</div>
+                <div class="timestamp" id="humid-ts">Last update: --</div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // Real-time data updater
-        async function updateData() {
+        async function fetchData() {
             try {
-                // Add timestamp to prevent caching
-                const response = await fetch('data.txt?t=' + new Date().getTime());
+                const response = await fetch('/data.txt?t=' + new Date().getTime());
                 const data = await response.text();
+                const readings = data.trim().split('\n').filter(line => line);
                 
-                // Format data display
-                const formattedData = data.split('\n')
-                    .filter(line => line.trim())
-                    .map(line => {
-                        const [timestamp, value] = line.split(',');
-                        return `${timestamp} → ${value}`;
-                    })
-                    .join('\n');
-                
-                document.getElementById('data-display').textContent = formattedData;
+                if(readings.length > 0) {
+                    const latest = readings[readings.length-1].split(',');
+                    if(latest.length === 3) {
+                        document.getElementById('temperature').textContent = latest[1] + '°C';
+                        document.getElementById('humidity').textContent = latest[2] + '%';
+                        document.getElementById('temp-ts').textContent = `Last update: ${latest[0]}`;
+                        document.getElementById('humid-ts').textContent = `Last update: ${latest[0]}`;
+                    }
+                }
             } catch (error) {
                 console.error('Error fetching data:', error);
-                document.getElementById('data-display').textContent = "Error loading data";
             }
         }
 
         // Update every 2 seconds
-        setInterval(updateData, 2000);
-        // Initial load
-        updateData();
+        setInterval(fetchData, 2000);
+        fetchData(); // Initial load
     </script>
 </body>
 </html>
