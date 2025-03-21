@@ -1,1 +1,80 @@
-Hello from ESP32!
+<head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>TechVision1 | Innovative Solutions</title>
+     <title>TechVision | Innovative Solutions</title>
+     <style>
+         /* Reset and Base Styles */
+         * {
+ @@ -181,70 +181,70 @@
+     <main>
+         <section class="hero">
+             <div class="hero-content">
+                 <h1>Welcome to the Future of Innovation</h1>
+                 <h1>Welcome to the Future of Innovation test1-corton</h1>
+                 <p>Experience technology that's intuitive, powerful, and beautifully designed.</p>
+                 <a href="#" class="cta-button">Explore Products</a>
+             </div>
+         </section>
+ 
+         <section class="features">
+             <div class="features-grid">
+                 <div class="feature-card">
+                     <img src="6718fbb85d1152665bfafec4_Untitled design (14).jpg" alt="Design Icon">
+                     <h3>Sleek Design</h3>
+                     <p>Premium materials and minimalist aesthetics for a timeless look.</p>
+                 </div>
+                 <div class="feature-card">
+                     <img src="performace.webp" alt="Performance Icon">
+                     <h3>Peak Performance</h3>
+                     <p>Cutting-edge technology that delivers unmatched speed and efficiency.</p>
+                 </div>
+                 <div class="feature-card">
+                     <img src="cybersecurity4.jpg" alt="Security Icon">
+                     <h3>Advanced Security</h3>
+                     <p>Enterprise-grade protection for your data and privacy.</p>
+                 </div>
+             </div>
+         </section>
+     </main>
+ 
+     <script>
+         // Smooth scroll behavior
+         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+             anchor.addEventListener('click', function (e) {
+                 e.preventDefault();
+                 document.querySelector(this.getAttribute('href')).scrollIntoView({
+                     behavior: 'smooth'
+                 });
+             });
+         });
+ 
+         // Intersection Observer for animation
+         const observer = new IntersectionObserver((entries) => {
+             entries.forEach(entry => {
+                 if (entry.isIntersecting) {
+                     entry.target.style.opacity = 1;
+                     entry.target.style.transform = 'translateY(0)';
+                 }
+             });
+         });
+ 
+         // Observe feature cards
+         document.querySelectorAll('.feature-card').forEach((card) => {
+             card.style.opacity = 0;
+             card.style.transform = 'translateY(20px)';
+             card.style.transition = 'all 0.6s ease';
+             observer.observe(card);
+         });
+ 
+         // Sticky navigation
+         window.addEventListener('scroll', () => {
+             const navWrapper = document.querySelector('.nav-wrapper');
+             if (window.scrollY > 100) {
+                 navWrapper.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+             } else {
+                 navWrapper.style.boxShadow = 'none';
+             }
+         });
+     </script>
+ </body>
