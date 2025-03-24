@@ -129,20 +129,24 @@
         // Toggle engine button logic
         let engine = 0; // Initial state
 
-        function toggleEngine() {
+       function toggleEngine() {
             let button = document.getElementById("toggleButton");
-
-            if (engine === 0) {
-                button.style.backgroundColor = "green";
-                button.textContent = "Engine ON";
-                engine = 1;
-            } else {
-                button.style.backgroundColor = "red";
-                button.textContent = "Engine OFF";
-                engine = 0;
-            }
-
-            console.log("Engine:", engine); // Log the engine state
+        
+            engine = engine === 0 ? 1 : 0; // Toggle the state
+            button.style.backgroundColor = engine ? "green" : "red";
+            button.textContent = engine ? "Engine ON" : "Engine OFF";
+        
+            console.log("Engine:", engine);
+        
+            // Send engine state to a server
+            fetch('/update-engine', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ engine: engine })
+            })
+            .then(response => response.json())
+            .then(data => console.log("Server Response:", data))
+            .catch(error => console.error("Error sending data:", error));
         }
     </script>
 
