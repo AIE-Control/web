@@ -105,8 +105,8 @@
     <script>
         async function fetchData() {
             try {
-                const response = await fetch('/data.txt?t=' + new Date().getTime());
-                const data = await response.text();
+                const response = await fetch('/var/www/data/ sensor-data.csv?t=' + new Date().getTime());
+                const data = await response.csv();
                 const readings = data.trim().split('\n').filter(line => line);
                 
                 if (readings.length > 0) {
