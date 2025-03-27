@@ -102,30 +102,35 @@
         </div>
     </div>
 
-    <script>
-        async function fetchData() {
-            try {
-                const response = await fetch('/var/www/data/ sensor-data.csv?t=' + new Date().getTime());
-                const data = await response.csv();
-                const readings = data.trim().split('\n').filter(line => line);
+   <script>
+    async function fetchData() {
+        try {
+            // 1. Fetch from correct endpoint (not direct file path)
+            const response = await fetch('/data/sensor-data.csv?t=' + new Date().getTime());
+            const textData = await response.text();
+            const readings = textData.trim().split('\n').filter(line => line);
+            
+            if (readings.length > 0) {
+                // 2. Get the latest reading
+                const latest = readings[readings.length - 1].split(',');
                 
-                if (readings.length > 0) {
-                    const latest = readings[readings.length - 1].split(',');
-                    if (latest.length === 3) {
-                        document.getElementById('temperature').textContent = latest[1];
-                        document.getElementById('humidity').textContent = latest[2] + ' V';
-                        document.getElementById('temp-ts').textContent = `Last update: ${latest[0]}`;
-                        document.getElementById('humid-ts').textContent = `Last update: ${latest[0]}`;
-                    }
+                // 3. Assuming CSV format: timestamp,rpm,voltage
+                if (latest.length === 3) {
+                    document.getElementById('temperature').textContent = latest[1];
+                    document.getElementById('humidity').textContent = latest[2] + ' V';
+                    document.getElementById('temp-ts').textContent = `Last update: ${latest[0]}`;
+                    document.getElementById('humid-ts').textContent = `Last update: ${latest[0]}`;
                 }
-            } catch (error) {
-                console.error('Error fetching data:', error);
             }
+        } catch (error) {
+            console.error('Error fetching data:', error);
         }
+    }
 
-        setInterval(fetchData, 2000);
-        fetchData();
-
+    // 4. Update immediately and every 2 seconds
+    setInterval(fetchData, 2000);
+    fetchData();
+       
         // Toggle engine button logic
         let engine = 0; // Initial state
 
