@@ -1,159 +1,81 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TEREX Dashboard</title>
-    <style>
-        :root {
-            --primary-color: #0071e3;
-            --background-color: #f5f5f7;
-            --card-color: #ffffff;
-        }
+<script>
+    // Initialize engine state
+    let engineState = 0;
+    
+    // DOM Elements
+    const rpmElement = document.getElementById('temperature');
+    const voltageElement = document.getElementById('humidity');
+    const timestampElements = document.querySelectorAll('.timestamp');
+    const toggleButton = document.getElementById('toggleButton');
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            margin: 0;
-            padding: 2rem;
-            background-color: var(--background-color);
-            color: #1d1d1f;
-        }
-
-        .dashboard {
-            max-width: 1200px;
-            margin: 0 auto;
-            text-align: center;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .data-card {
-            background: var(--card-color);
-            border-radius: 18px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-
-        .sensor-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-        }
-
-        .sensor-value {
-            font-size: 2.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 1rem 0;
-        }
-
-        .timestamp {
-            color: #86868b;
-            font-size: 0.9rem;
-        }
-
-        /* Toggle button styles */
-        .button-container {
-            display: flex;
-            justify-content: center;
-            margin-top: 1rem;
-        }
-
-        .toggle-button {
-            padding: 15px 30px;
-            font-size: 18px;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background-color: red; /* Initial state */
-            transition: background-color 0.3s ease;
-        }
-    </style>
-</head>
-<body>
-    <div class="dashboard">
-        <div class="header">
-            <h1>TEREX Live Sensor Data</h1>
-            <p>Real-time updates from connected devices</p>
-        </div>
-
-        <div class="sensor-grid">
-            <div class="data-card">
-                <h2>RPM</h2>
-                <div class="sensor-value" id="temperature">--</div>
-                <div class="timestamp" id="temp-ts">Last update: --</div>
-            </div>
-
-            <div class="data-card">
-                <h2>Voltage</h2>
-                <div class="sensor-value" id="humidity">--</div>
-                <div class="timestamp" id="humid-ts">Last update: --</div>
-            </div>
-        </div>
-
-        <!-- Toggle Button -->
-        <div class="button-container">
-            <button id="toggleButton" class="toggle-button" onclick="toggleEngine()">Engine OFF</button>
-        </div>
-    </div>
-
-   <script>
-    async function fetchData() {
+    async function fetchSensorData() {
         try {
-            // 1. Fetch from correct endpoint (not direct file path)
-            const response = await fetch('/data/sensor-data.csv?t=' + new Date().getTime());
+            const response = await fetch('/data/sensor-data.csv?t=' + Date.now());
+            
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const textData = await response.text();
             const readings = textData.trim().split('\n').filter(line => line);
             
             if (readings.length > 0) {
-                // 2. Get the latest reading
-                const latest = readings[readings.length - 1].split(',');
+                const latestReading = readings[readings.length - 1].split(',');
                 
-                // 3. Assuming CSV format: timestamp,rpm,voltage
-                if (latest.length === 3) {
-                    document.getElementById('temperature').textContent = latest[1];
-                    document.getElementById('humidity').textContent = latest[2] + ' V';
-                    document.getElementById('temp-ts').textContent = `Last update: ${latest[0]}`;
-                    document.getElementById('humid-ts').textContent = `Last update: ${latest[0]}`;
+                if (latestReading.length === 3) {
+                    // Update display values with number formatting
+                    rpmElement.textContent = parseFloat(latestReading[1]).toFixed(2);
+                    voltageElement.textContent = `${parseFloat(latestReading[2]).toFixed(2)} V`;
+                    
+                    // Update timestamps
+                    const formattedTime = new Date(latestReading[0] * 1000).toLocaleTimeString();
+                    timestampElements.forEach(el => {
+                        el.textContent = `Last update: ${formattedTime}`;
+                    });
                 }
             }
         } catch (error) {
-            console.error('Error fetching data:', error);
+            console.error('Data fetch error:', error);
+            voltageElement.textContent = '--';
+            rpmElement.textContent = '--';
+            timestampElements.forEach(el => {
+                el.textContent = 'Last update: failed';
+            });
         }
     }
 
-    // 4. Update immediately and every 2 seconds
-    setInterval(fetchData, 2000);
-    fetchData();
-       
-        // Toggle engine button logic
-        let engine = 0; // Initial state
-
-       function toggleEngine() {
-            let button = document.getElementById("toggleButton");
-        
-            engine = engine === 0 ? 1 : 0; // Toggle the state
-            button.style.backgroundColor = engine ? "green" : "red";
-            button.textContent = engine ? "Engine ON" : "Engine OFF";
-        
-            console.log("Engine:", engine);
-        
-            // Send engine state to a server
-            fetch('/update-engine', {
+    async function toggleEngine() {
+        try {
+            const newState = engineState === 0 ? 1 : 0;
+            const response = await fetch('/update-engine.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ engine: engine })
-            })
-            .then(response => response.json())
-            .then(data => console.log("Server Response:", data))
-            .catch(error => console.error("Error sending data:", error));
-        }
-    </script>
+                body: JSON.stringify({ engine: newState })
+            });
 
-</body>
-</html>
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const result = await response.json();
+            engineState = result.engine;
+            toggleButton.style.backgroundColor = engineState ? "green" : "red";
+            toggleButton.textContent = engineState ? "Engine ON" : "Engine OFF";
+            
+        } catch (error) {
+            console.error('Toggle failed:', error);
+            alert('Engine control update failed. Please try again.');
+        }
+    }
+
+    // Initial data load
+    fetchSensorData();
+    
+    // Set up periodic updates
+    const updateInterval = setInterval(fetchSensorData, 2000);
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        clearInterval(updateInterval);
+    });
+</script>
